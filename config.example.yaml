@@ -1,0 +1,11 @@
+#  飞书
+APP_ID: cli_axxx
+APP_SECRET: xxx
+APP_ENCRYPT_KEY: xxx
+APP_VERIFICATION_TOKEN: xxx
+# openAI key
+OPENAI_KEYS:  
+ - sk-xxxxx
+OPENAI_URL: https://api.openai.com
+# 服务器配置
+HTTP_PORT: 9000

@@ -1,0 +1,42 @@
+{
+  "schema": "2.0",
+  "header": {
+    "event_id": "f829779899e9f5b445f6dd541d36fa93",
+    "token": "Utj7wIjbtleg8IHzClRUgfTknOyDLJAO",
+    "create_time": "1680080854792",
+    "event_type": "im.message.receive_v1",
+    "tenant_key": "11736b96a80e575e",
+    "app_id": "cli_a4a878685179d013"
+  },
+  "event": {
+    "message": {
+      "chat_id": "oc_dbe03dcee25d37a733cb4dcd62a0bdef",
+      "chat_type": "group",
+      "content": "{\"text\":\"@_user_1 你好啊，请自我介绍一下\"}",
+      "create_time": "1680080854578",
+      "mentions": [
+        {
+          "id": {
+            "open_id": "ou_8d1be4a260ea728c933dc7f3053a79f3",
+            "union_id": "on_93fb6aefadeb2aa1a9c3a013a981dd44",
+            "user_id": ""
+          },
+          "key": "@_user_1",
+          "name": "ChatGPT机器人",
+          "tenant_key": "11736b96a80e575e"
+        }
+      ],
+      "message_id": "om_49a810e8f592f1f557df709b243b19ed",
+      "message_type": "text"
+    },
+    "sender": {
+      "sender_id": {
+        "open_id": "ou_182517860dc27b0d83d9f6007b939c8a",
+        "union_id": "on_f0807700300be658a6c2362fea5c3e2b",
+        "user_id": "606270313"
+      },
+      "sender_type": "user",
+      "tenant_key": "11736b96a80e575e"
+    }
+  }
+}
