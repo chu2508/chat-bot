@@ -10,6 +10,6 @@ COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 COPY . .
-RUN go build -v -o /usr/local/bin/app ./...
+RUN go build -o /usr/local/bin/app ./...
 
 CMD ["app -c /use/src/app/config.yaml"]
