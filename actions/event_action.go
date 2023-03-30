@@ -105,7 +105,7 @@ func doPrecess(payload *bot.ActionPayload) (string, error) {
 
 	req := openai.ChatCompletionRequest{
 		Messages:    messages,
-		Model:       openai.GPT3Dot5Turbo,
+		Model:       payload.Bot.Config.OpenAIModel,
 		Temperature: 0.6,
 	}
 	res, err := gpt.CreateChatCompletion(payload.Ctx, req)

@@ -10,6 +10,7 @@ type Config struct {
 	FeishuAppVerificationToken string
 	OpenAIKeys                 []string
 	OpenAIUrl                  string
+	OpenAIModel                string
 	HttpPort                   int
 }
 
@@ -26,6 +27,7 @@ func LoadConfig(path string) *Config {
 		FeishuAppVerificationToken: viper.GetString("APP_VERIFICATION_TOKEN"),
 		OpenAIKeys:                 viper.GetStringSlice("OPENAI_KEYS"),
 		OpenAIUrl:                  getViperStr("OPENAI_URL", "https://api.openai.com"),
+		OpenAIModel:                getViperStr("OPENAI_MODEL", "gpt-3.5-turbo"),
 		HttpPort:                   getViperInt("HTTP_PORT", 10086),
 	}
 

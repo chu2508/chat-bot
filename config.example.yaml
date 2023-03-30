@@ -7,5 +7,6 @@ APP_VERIFICATION_TOKEN: xxx
 OPENAI_KEYS:  
  - sk-xxxxx
 OPENAI_URL: https://api.openai.com
+OPENAI_MODEL: gpt-3.5-turbo
 # 服务器配置
 HTTP_PORT: 9000

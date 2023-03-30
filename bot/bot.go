@@ -42,6 +42,7 @@ type Bot struct {
 	SessionCache cache.SessionCacheInterface
 	MessageCache cache.MessageCacheInterface
 	Actions      ActionChain
+	Config       *Config
 }
 
 func NewBot(cfg *Config, actions ActionChain) *Bot {
@@ -54,6 +55,7 @@ func NewBot(cfg *Config, actions ActionChain) *Bot {
 		SessionCache: cache.GetSessionCache(),
 		MessageCache: cache.GetMessageCache(),
 		Actions:      actions,
+		Config:       cfg,
 	}
 }
 
