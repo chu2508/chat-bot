@@ -80,6 +80,7 @@ func replyTextMessage(payload *bot.ActionPayload, replayMessage string) (*larkim
 		MessageId(payload.Info.MessageId).
 		Build()
 	res, err := lark.Im.Message.Reply(payload.Ctx, req)
+	fmt.Println("reply msg: ", replayMessage)
 	fmt.Println("reply res: ", res)
 
 	return res, err
