@@ -1,4 +1,4 @@
-FROM golang:1.20
+FROM golang:1.20-alpine3.16
 
 WORKDIR /usr/src/app
 ENV CGO_ENABLED=0
