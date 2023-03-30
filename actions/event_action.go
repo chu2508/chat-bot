@@ -1,7 +1,9 @@
 package actions
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
@@ -31,10 +33,31 @@ func (t *TextMessageAction) Execute(payload *bot.ActionPayload) (bool, error) {
 	}
 	message, err := doPrecess(payload)
 	if err != nil {
+		fmt.Println("get chat message error: ", err)
+		return false, err
+	}
+	message, err = processMessage(message)
+	if err != nil {
+		fmt.Println("processMessage error: ", err)
 		return false, err
 	}
 	_, err = replyTextMessage(payload, message)
 	return false, err
+}
+
+func processMessage(msg interface{}) (string, error) {
+	msg = strings.TrimSpace(msg.(string))
+	msgB, err := json.Marshal(msg)
+	if err != nil {
+		return "", err
+	}
+
+	msgStr := string(msgB)
+
+	if len(msgStr) >= 2 {
+		msgStr = msgStr[1 : len(msgStr)-1]
+	}
+	return msgStr, nil
 }
 
 func doPrecess(payload *bot.ActionPayload) (string, error) {
