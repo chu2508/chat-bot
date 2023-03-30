@@ -1,0 +1,1 @@
+docker run -p 7777:9000  -dit --rm  --name tst-chat-bot my-chat-bot
