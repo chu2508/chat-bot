@@ -64,8 +64,20 @@ func doPrecess(payload *bot.ActionPayload) (string, error) {
 	gpt := payload.Bot.GPT
 	sessionId := payload.Info.SessionId
 	messages := payload.Bot.SessionCache.GetMessage(sessionId)
-	fmt.Println("user message content:", payload.Info.Content)
+	content := payload.Info.Content
+	fmt.Println("user message content: ", payload.Info.Content)
 	fmt.Println("session messages: ", messages)
+	if msg, isCosplay := eitherCutPrefix(content, "/cosplay", "角色扮演"); isCosplay {
+		payload.Bot.SessionCache.Clear(sessionId)
+		messages = []openai.ChatCompletionMessage{
+			{
+				Role:    openai.ChatMessageRoleSystem,
+				Content: msg,
+			},
+		}
+		payload.Bot.SessionCache.SetMessage(sessionId, messages)
+		return "🤖️：已开启角色扮演模式，请回复这条消息，开始你的表演。", nil
+	}
 	if messages == nil {
 		messages = []openai.ChatCompletionMessage{
 			{
@@ -135,4 +147,14 @@ func (*SupportedMessageAction) Execute(payload *bot.ActionPayload) (bool, error)
 	}
 
 	return false, nil
+}
+
+func eitherCutPrefix(s string, prefix ...string) (string, bool) {
+	// 任一前缀匹配则返回剩余部分
+	for _, p := range prefix {
+		if strings.HasPrefix(s, p) {
+			return strings.TrimPrefix(s, p), true
+		}
+	}
+	return s, false
 }
