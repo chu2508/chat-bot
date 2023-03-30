@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"github.com/sashabaranov/go-openai"
 	"tastien.com/chat-bot/bot"
@@ -91,25 +90,21 @@ type UnknownMessageAction struct {
 }
 
 func (u *UnknownMessageAction) Execute(payload *bot.ActionPayload) (bool, error) {
-	messageId := payload.Info.MessageId
-	replyTextMessage(payload, "🤖️：还不支持的消息类型，敬请期待功能开发！")
-	ctx := payload.Ctx
-	client := payload.Bot.Lark
-	body := larkim.NewReplyMessageReqBodyBuilder().
-		Content("🤖️：还不支持的消息类型，敬请期待功能开发！").
-		MsgType("text").
-		Uuid(uuid.New().String()).
-		Build()
-
-	req := larkim.NewReplyMessageReqBuilder().
-		Body(body).
-		MessageId(messageId).
-		Build()
-	payload.Bot.Lark.Im.Message.Reply(ctx, req)
-
-	res, err := client.Im.Message.Reply(ctx, req)
-
-	fmt.Println("reply res: ", res)
-
+	_, err := replyTextMessage(payload, "🤖️：还不支持的消息类型，敬请期待功能开发！")
 	return false, err
+}
+
+// 判断是否支持处理这个消息
+type SupportedMessageAction struct {
+}
+
+func (*SupportedMessageAction) Execute(payload *bot.ActionPayload) (bool, error) {
+	if payload.Info.HandlerType == bot.PersonalHandler {
+		return true, nil
+	}
+	if payload.Info.HandlerType == bot.GroupHandler {
+		return true, nil
+	}
+
+	return false, nil
 }

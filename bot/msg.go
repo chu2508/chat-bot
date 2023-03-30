@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"strings"
 
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 )
@@ -21,7 +22,7 @@ type HandlerType string
 
 const (
 	GroupHandler    HandlerType = "group"
-	PersonalHandler HandlerType = "personal"
+	PersonalHandler HandlerType = "p2p"
 )
 
 func NewMsgInfo(event *larkim.P2MessageReceiveV1) *MsgInfo {
@@ -31,6 +32,7 @@ func NewMsgInfo(event *larkim.P2MessageReceiveV1) *MsgInfo {
 	chatId := msg.ChatId
 	content := msg.Content
 	msgType := msg.MessageType
+	var handlerType HandlerType = HandlerType(*event.Event.Message.ChatType)
 
 	// 获取sessionId，用于后续的回复，如果有rootId，则使用rootId，否则使用messageId
 	sessionId := rootId
@@ -39,11 +41,12 @@ func NewMsgInfo(event *larkim.P2MessageReceiveV1) *MsgInfo {
 	}
 
 	return &MsgInfo{
-		ChatId:    *chatId,
-		MessageId: *messageId,
-		SessionId: *sessionId,
-		MsgType:   *msgType,
-		Content:   parseContent(*content),
+		HandlerType: handlerType,
+		ChatId:      *chatId,
+		MessageId:   *messageId,
+		SessionId:   *sessionId,
+		MsgType:     *msgType,
+		Content:     parseContent(*content),
 	}
 }
 
@@ -65,5 +68,6 @@ func parseContent(content string) string {
 		return ""
 	}
 	text := contentMap["text"].(string)
-	return msgFilter(text)
+
+	return strings.Trim(msgFilter(text), " ")
 }
