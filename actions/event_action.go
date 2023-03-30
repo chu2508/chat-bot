@@ -64,6 +64,8 @@ func doPrecess(payload *bot.ActionPayload) (string, error) {
 	gpt := payload.Bot.GPT
 	sessionId := payload.Info.SessionId
 	messages := payload.Bot.SessionCache.GetMessage(sessionId)
+	fmt.Println("user message content:", payload.Info.Content)
+	fmt.Println("session messages: ", messages)
 	if messages == nil {
 		messages = []openai.ChatCompletionMessage{
 			{
@@ -78,14 +80,16 @@ func doPrecess(payload *bot.ActionPayload) (string, error) {
 	})
 
 	req := openai.ChatCompletionRequest{
-		Messages: messages,
-		Model:    openai.GPT3Dot5Turbo,
+		Messages:    messages,
+		Model:       openai.GPT3Dot5Turbo,
+		Temperature: 0.6,
 	}
 	res, err := gpt.CreateChatCompletion(payload.Ctx, req)
 	if err != nil {
 		fmt.Println("gpt3 error:", err)
 		return "", err
 	}
+	payload.Bot.SessionCache.SetMessage(sessionId, messages)
 	return res.Choices[0].Message.Content, nil
 }
 
