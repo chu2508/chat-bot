@@ -60,6 +60,11 @@ func processMessage(msg interface{}) (string, error) {
 	return msgStr, nil
 }
 
+var defaultPrompt = openai.ChatCompletionMessage{
+	Role:    openai.ChatMessageRoleSystem,
+	Content: "You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible.\nKnowledge cutoff: 2021-09-01\nCurrent date: " + time.Now().Format("2006-01-02"),
+}
+
 func doPrecess(payload *bot.ActionPayload) (string, error) {
 	gpt := payload.Bot.GPT
 	sessionId := payload.Info.SessionId
@@ -78,13 +83,20 @@ func doPrecess(payload *bot.ActionPayload) (string, error) {
 		payload.Bot.SessionCache.SetMessage(sessionId, messages)
 		return "🤖️：已开启角色扮演模式，请回复这条消息，开始你的表演。", nil
 	}
-	if messages == nil {
-		messages = []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleSystem,
-				Content: "You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible.\nKnowledge cutoff: 2021-09-01\nCurrent date: " + time.Now().Format("2006-01-02"),
-			},
+	if _, isClear := eitherCutPrefix(content, "/clear", "清除"); isClear {
+		messages := payload.Bot.SessionCache.GetMessage(sessionId)
+		if messages == nil {
+			messages = []openai.ChatCompletionMessage{defaultPrompt}
+		} else {
+			messages = messages[:1]
 		}
+		payload.Bot.SessionCache.Clear(sessionId)
+		payload.Bot.SessionCache.SetMessage(sessionId, messages)
+		return "🤖️：已清除会话上下文信息。", nil
+	}
+	if messages == nil {
+
+		messages = []openai.ChatCompletionMessage{defaultPrompt}
 	}
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleUser,
@@ -101,6 +113,7 @@ func doPrecess(payload *bot.ActionPayload) (string, error) {
 		fmt.Println("gpt3 error:", err)
 		return "", err
 	}
+	messages = append(messages, res.Choices[0].Message)
 	payload.Bot.SessionCache.SetMessage(sessionId, messages)
 	return res.Choices[0].Message.Content, nil
 }
