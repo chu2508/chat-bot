@@ -12,4 +12,4 @@ RUN go mod download && go mod verify
 COPY . .
 RUN go build -o app main.go
 
-CMD ["app -c /use/src/app/config.yaml"]
+CMD ["./app"]
