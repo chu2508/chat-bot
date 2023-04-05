@@ -9,19 +9,8 @@ import (
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"github.com/sashabaranov/go-openai"
 	"tastien.com/chat-bot/bot"
+	"tastien.com/chat-bot/utils"
 )
-
-// 避免重复处理消息
-type ProcessedMessageAction struct {
-}
-
-func (p *ProcessedMessageAction) Execute(action *bot.ActionPayload) (bool, error) {
-	if action.Bot.MessageCache.HasMessage(action.Info.MessageId) {
-		return false, nil
-	}
-	action.Bot.MessageCache.SetMessage(action.Info.MessageId)
-	return true, nil
-}
 
 // 处理文字消息
 type TextMessageAction struct {
@@ -72,7 +61,7 @@ func doPrecess(payload *bot.ActionPayload) (string, error) {
 	content := payload.Info.Content
 	fmt.Println("user message content: ", payload.Info.Content)
 	fmt.Println("session messages: ", messages)
-	if msg, isCosplay := eitherCutPrefix(content, "/cosplay", "角色扮演"); isCosplay {
+	if msg, isCosplay := utils.EitherCutPrefix(content, "/cosplay", "角色扮演"); isCosplay {
 		payload.Bot.SessionCache.Clear(sessionId)
 		messages = []openai.ChatCompletionMessage{
 			{
@@ -83,7 +72,7 @@ func doPrecess(payload *bot.ActionPayload) (string, error) {
 		payload.Bot.SessionCache.SetMessage(sessionId, messages)
 		return "🤖️：已开启角色扮演模式，请回复这条消息，开始你的表演。", nil
 	}
-	if _, isClear := eitherCutPrefix(content, "/clear", "清除"); isClear {
+	if _, isClear := utils.EitherCutPrefix(content, "/clear", "清除"); isClear {
 		messages := payload.Bot.SessionCache.GetMessage(sessionId)
 		if messages == nil {
 			messages = []openai.ChatCompletionMessage{defaultPrompt}
@@ -145,29 +134,4 @@ type UnknownMessageAction struct {
 func (u *UnknownMessageAction) Execute(payload *bot.ActionPayload) (bool, error) {
 	_, err := replyTextMessage(payload, "🤖️：还不支持的消息类型，敬请期待功能开发！")
 	return false, err
-}
-
-// 判断是否支持处理这个消息
-type SupportedMessageAction struct {
-}
-
-func (*SupportedMessageAction) Execute(payload *bot.ActionPayload) (bool, error) {
-	if payload.Info.HandlerType == bot.PersonalHandler {
-		return true, nil
-	}
-	if payload.Info.HandlerType == bot.GroupHandler {
-		return true, nil
-	}
-
-	return false, nil
-}
-
-func eitherCutPrefix(s string, prefix ...string) (string, bool) {
-	// 任一前缀匹配则返回剩余部分
-	for _, p := range prefix {
-		if strings.HasPrefix(s, p) {
-			return strings.TrimPrefix(s, p), true
-		}
-	}
-	return s, false
 }
