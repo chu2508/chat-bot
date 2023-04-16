@@ -4,6 +4,7 @@ import (
 	"context"
 
 	lark "github.com/larksuite/oapi-sdk-go/v3"
+	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"github.com/sashabaranov/go-openai"
 	"tastien.com/chat-bot/cache"
@@ -37,4 +38,9 @@ func (b *Bot) HandleReceive(ctx context.Context, event *larkim.P2MessageReceiveV
 
 	b.Actions.Execute(ctx, b, info)
 	return nil
+}
+
+func (b *Bot) HandleCardAction(ctx context.Context, event *larkcard.CardAction) (interface{}, error) {
+
+	return nil, nil
 }

@@ -3,9 +3,10 @@ package bot
 import "context"
 
 type ActionPayload struct {
-	Ctx  context.Context
-	Bot  *Bot
-	Info *MsgInfo
+	Ctx   context.Context
+	Bot   *Bot
+	Info  *MsgInfo
+	Value *CardValues
 }
 
 // 处理动作接口，返回true表示继续处理，false表示不再处理，error表示处理出错

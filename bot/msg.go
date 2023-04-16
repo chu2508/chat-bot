@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 
+	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 )
 
@@ -48,6 +49,20 @@ func NewMsgInfo(event *larkim.P2MessageReceiveV1) *MsgInfo {
 		MsgType:     *msgType,
 		Content:     parseContent(*content),
 	}
+}
+
+type CardValues struct {
+	Option    string
+	SessionId string
+}
+
+func NewCardValues(cardAction *larkcard.CardAction) *CardValues {
+	val := &CardValues{}
+	acVal := cardAction.Action.Value
+	acValJson, _ := json.Marshal(acVal)
+	json.Unmarshal(acValJson, val)
+	val.Option = cardAction.Action.Option
+	return val
 }
 
 func msgFilter(msg string) string {
