@@ -12,8 +12,16 @@ const (
 	maxCacheTime = time.Hour * 12
 )
 
+type SessionMode string
+
+const (
+	SessionModeChat        SessionMode = "chat"
+	SessionModeCreateImage SessionMode = "create_image"
+)
+
 type SessionMeta struct {
 	Messages []openai.ChatCompletionMessage `json:"messages,omitempty"`
+	Mode     SessionMode                    `json:"mode,omitempty"`
 }
 
 type sessionCache struct {
@@ -23,6 +31,8 @@ type sessionCache struct {
 type SessionCacheInterface interface {
 	GetMessage(sessionId string) []openai.ChatCompletionMessage
 	SetMessage(sessionId string, message []openai.ChatCompletionMessage)
+	SetMode(sessionId string, mode SessionMode)
+	GetMode(sessionId string) SessionMode
 	Clear(sessionId string)
 }
 
@@ -55,21 +65,35 @@ func (s *sessionCache) SetMessage(sessionId string, message []openai.ChatComplet
 	}
 
 	// 从cache 中获取Session，如果没有则创建一个新的
-	var session SessionMeta
-	if v, ok := s.cache.Get(sessionId); !ok {
-		session = SessionMeta{
-			Messages: message,
-		}
-	} else {
-		session = v.(SessionMeta)
-		session.Messages = message
-	}
+	var session SessionMeta = s.getSession(sessionId)
+	session.Messages = message
 	s.cache.Set(sessionId, session, maxCacheTime)
 }
 
 // Clear 清除缓存
 func (s *sessionCache) Clear(sessionId string) {
 	s.cache.Delete(sessionId)
+}
+
+func (s *sessionCache) SetMode(sessionId string, mode SessionMode) {
+	var session SessionMeta = s.getSession(sessionId)
+	session.Mode = mode
+	s.cache.Set(sessionId, session, maxCacheTime)
+}
+func (s *sessionCache) GetMode(sessionId string) SessionMode {
+	if v, ok := s.cache.Get(sessionId); ok {
+		return v.(SessionMeta).Mode
+	}
+
+	return ""
+}
+
+func (s *sessionCache) getSession(sessionId string) SessionMeta {
+	if v, ok := s.cache.Get(sessionId); ok {
+		return v.(SessionMeta)
+	}
+
+	return SessionMeta{}
 }
 
 func getMessagesTotalLength(messages []openai.ChatCompletionMessage) int {

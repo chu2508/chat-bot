@@ -1,14 +1,19 @@
 package actions
 
 import (
+	"bytes"
+	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"github.com/sashabaranov/go-openai"
 	"tastien.com/chat-bot/bot"
+	"tastien.com/chat-bot/cache"
 	"tastien.com/chat-bot/utils"
 )
 
@@ -20,6 +25,31 @@ func (t *TextMessageAction) Execute(payload *bot.ActionPayload) (bool, error) {
 	if payload.Info.MsgType != "text" {
 		return true, nil
 	}
+	mode := payload.Bot.SessionCache.GetMode(payload.Info.SessionId)
+	if mode == cache.SessionModeCreateImage {
+		gpt := payload.Bot.GPT
+		req := openai.ImageRequest{
+			Prompt:         payload.Info.Content,
+			Size:           openai.CreateImageSize1024x1024,
+			ResponseFormat: openai.CreateImageResponseFormatB64JSON,
+			N:              1,
+		}
+		res, err := gpt.CreateImage(payload.Ctx, req)
+		if err != nil {
+			fmt.Println("create image error: ", err)
+			return false, err
+		}
+
+		img, err := uploadImage(payload.Bot, res.Data[0].B64JSON)
+		if err != nil {
+			fmt.Println("upload image error: ", err)
+			return false, err
+		}
+		err = replyImage(payload, img)
+
+		return false, err
+	}
+
 	message, err := doPrecess(payload)
 	if err != nil {
 		fmt.Println("get chat message error: ", err)
@@ -61,6 +91,11 @@ func doPrecess(payload *bot.ActionPayload) (string, error) {
 	content := payload.Info.Content
 	fmt.Println("user message content: ", payload.Info.Content)
 	fmt.Println("session messages: ", messages)
+	if _, isCreateImage := utils.EitherCutPrefix(content, "/image", "生成图片"); isCreateImage {
+		payload.Bot.SessionCache.Clear(sessionId)
+		payload.Bot.SessionCache.SetMode(sessionId, cache.SessionModeCreateImage)
+		return "🤖️：已开启图片生成模式，请回复这条消息，生成图片。", nil
+	}
 	if msg, isCosplay := utils.EitherCutPrefix(content, "/cosplay", "角色扮演"); isCosplay {
 		payload.Bot.SessionCache.Clear(sessionId)
 		messages = []openai.ChatCompletionMessage{
@@ -84,7 +119,6 @@ func doPrecess(payload *bot.ActionPayload) (string, error) {
 		return "🤖️：已清除会话上下文信息。", nil
 	}
 	if messages == nil {
-
 		messages = []openai.ChatCompletionMessage{defaultPrompt}
 	}
 	messages = append(messages, openai.ChatCompletionMessage{
@@ -100,9 +134,10 @@ func doPrecess(payload *bot.ActionPayload) (string, error) {
 	res, err := gpt.CreateChatCompletion(payload.Ctx, req)
 	if err != nil {
 		fmt.Println("gpt3 error:", err)
-		return "", err
+		return err.Error(), err
 	}
 	messages = append(messages, res.Choices[0].Message)
+	payload.Bot.SessionCache.SetMode(sessionId, cache.SessionModeChat)
 	payload.Bot.SessionCache.SetMessage(sessionId, messages)
 	return res.Choices[0].Message.Content, nil
 }
@@ -134,4 +169,68 @@ type UnknownMessageAction struct {
 func (u *UnknownMessageAction) Execute(payload *bot.ActionPayload) (bool, error) {
 	_, err := replyTextMessage(payload, "🤖️：还不支持的消息类型，敬请期待功能开发！")
 	return false, err
+}
+
+func uploadImage(bot *bot.Bot, base64Str string) (*string, error) {
+	imageBytes, err := base64.StdEncoding.DecodeString(base64Str)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	client := bot.Lark
+	resp, err := client.Im.Image.Create(context.Background(),
+		larkim.NewCreateImageReqBuilder().
+			Body(larkim.NewCreateImageReqBodyBuilder().
+				ImageType(larkim.ImageTypeMessage).
+				Image(bytes.NewReader(imageBytes)).
+				Build()).
+			Build())
+
+	// 处理错误
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	// 服务端错误处理
+	if !resp.Success() {
+		fmt.Println(resp.Code, resp.Msg, resp.RequestId())
+		return nil, err
+	}
+	return resp.Data.ImageKey, nil
+}
+func replyImage(payload *bot.ActionPayload, ImageKey *string) error {
+	//fmt.Println("sendMsg", ImageKey, msgId)
+	bot := payload.Bot
+	ctx := payload.Ctx
+
+	msgImage := larkim.MessageImage{ImageKey: *ImageKey}
+	content, err := msgImage.String()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	client := bot.Lark
+
+	resp, err := client.Im.Message.Reply(ctx, larkim.NewReplyMessageReqBuilder().
+		MessageId(payload.Info.MessageId).
+		Body(larkim.NewReplyMessageReqBodyBuilder().
+			MsgType(larkim.MsgTypeImage).
+			Uuid(uuid.New().String()).
+			Content(content).
+			Build()).
+		Build())
+
+	// 处理错误
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	// 服务端错误处理
+	if !resp.Success() {
+		fmt.Println(resp.Code, resp.Msg, resp.RequestId())
+		return err
+	}
+	return nil
 }
