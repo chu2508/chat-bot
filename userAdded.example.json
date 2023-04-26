@@ -1,0 +1,33 @@
+{
+  "schema": "2.0",
+  "header": {
+    "event_id": "688e8345b151b57c3e9759ccb80a65e6",
+    "token": "Utj7wIjbtleg8IHzClRUgfTknOyDLJAO",
+    "create_time": "1682520320973",
+    "event_type": "im.chat.member.user.added_v1",
+    "tenant_key": "11736b96a80e575e",
+    "app_id": "cli_a4a878685179d013"
+  },
+  "event": {
+    "chat_id": "oc_dbe03dcee25d37a733cb4dcd62a0bdef",
+    "external": false,
+    "name": "TST-GPT Test",
+    "operator_id": {
+      "open_id": "ou_182517860dc27b0d83d9f6007b939c8a",
+      "union_id": "on_f0807700300be658a6c2362fea5c3e2b",
+      "user_id": "606270313"
+    },
+    "operator_tenant_key": "11736b96a80e575e",
+    "users": [
+      {
+        "name": "聂剑",
+        "tenant_key": "11736b96a80e575e",
+        "user_id": {
+          "open_id": "ou_22d4afaff6442d567a56c027f659eb03",
+          "union_id": "on_99c9217de369ff6abd36f1b9f6d5cad5",
+          "user_id": "d5a814a7"
+        }
+      }
+    ]
+  }
+}

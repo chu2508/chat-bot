@@ -78,8 +78,8 @@ func (b *Bot) getGreetText(ctx context.Context, user *recontact.User, event *lar
 	req, err := b.GPT.CreateCompletion(ctx, openai.CompletionRequest{
 		Model:       openai.GPT3TextDavinci003,
 		Prompt:      fmt.Sprintf("写一个100字的欢迎语，欢迎%s加入%s，他的职位是%s，欢迎语需要活泼有趣。", *userName, *event.Event.Name, *userJobTitle),
-		Temperature: 1,
-		Stream:      false,
+		Temperature: 0.6,
+		MaxTokens:   500,
 	})
 
 	if err != nil {
