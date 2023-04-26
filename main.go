@@ -1,16 +1,13 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	sdkginext "github.com/larksuite/oapi-sdk-gin"
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
-	larkcore "github.com/larksuite/oapi-sdk-go/v3/core"
 	"github.com/larksuite/oapi-sdk-go/v3/event/dispatcher"
-	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"github.com/spf13/pflag"
 	"tastien.com/chat-bot/actions"
 	"tastien.com/chat-bot/bot"
@@ -32,11 +29,7 @@ func CreateApp(cfg *bot.Config) (func(), *gin.Engine) {
 
 	eventHandler := dispatcher.NewEventDispatcher(cfg.FeishuAppVerificationToken, cfg.FeishuAppEncryptKey).
 		OnP2MessageReceiveV1(bot.HandleReceive).
-		OnP2MessageReadV1(func(ctx context.Context, event *larkim.P2MessageReadV1) error {
-			fmt.Println(larkcore.Prettify(event))
-			fmt.Println(event.RequestId())
-			return nil
-		})
+		OnP2ChatMemberUserAddedV1(bot.HandleUserAdded)
 
 	cardHandler := larkcard.NewCardActionHandler(cfg.FeishuAppVerificationToken,
 		cfg.FeishuAppEncryptKey,
