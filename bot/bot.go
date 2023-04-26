@@ -50,8 +50,13 @@ func (b *Bot) HandleCardAction(ctx context.Context, event *larkcard.CardAction) 
 
 // 实现用户加群欢迎语
 func (b *Bot) HandleUserAdded(ctx context.Context, event *larkim.P2ChatMemberUserAddedV1) error {
+
 	// 先获取用户信息
 	userId := event.Event.Users[0].UserId.UserId
+	eventId := event.EventV2Base.Header.EventID
+	if b.MessageCache.HasMessage(eventId) {
+		return nil
+	}
 	fmt.Println("HandleUserAdded: ", *userId)
 
 	req := recontact.NewGetUserReqBuilder().UserId(*userId).UserIdType("user_id").Build()
@@ -69,6 +74,7 @@ func (b *Bot) HandleUserAdded(ctx context.Context, event *larkim.P2ChatMemberUse
 	// 在发送群消息
 	message, _ := utils.ProcessMessage(greetStr)
 	b.sendMsg(ctx, *event.Event.ChatId, message)
+	b.MessageCache.SetMessage(eventId)
 	return nil
 }
 
