@@ -51,12 +51,12 @@ func (b *Bot) HandleCardAction(ctx context.Context, event *larkcard.CardAction) 
 func (b *Bot) HandleUserAdded(ctx context.Context, event *larkim.P2ChatMemberUserAddedV1) error {
 	// 先获取用户信息
 	userId := event.Event.Users[0].UserId.UserId
-	fmt.Println("HandleUserAdded: ", userId)
+	fmt.Println("HandleUserAdded: ", *userId)
 
 	req := recontact.NewGetUserReqBuilder().UserId(*userId).UserIdType("user_id").Build()
 	res, err := b.Lark.Contact.User.Get(ctx, req)
 	if err != nil {
-		fmt.Println("GetUserError:", err)
+		fmt.Printf("GetUserError: %s", err)
 		return err
 	}
 
@@ -73,9 +73,9 @@ func (b *Bot) getGreetText(ctx context.Context, user *recontact.User, event *lar
 	// 根据用户信息里的名称和职位生成欢迎语
 	userName := user.Name
 	userJobTitle := user.JobTitle
-	fmt.Println("UserName: ", userName)
-	fmt.Println("JobTitle: ", userJobTitle)
-	fmt.Println("UserCustomData: ", user.CustomAttrs)
+	fmt.Println("UserName: ", *userName)
+	fmt.Println("JobTitle: ", *userJobTitle)
+	fmt.Println(fmt.Sprintf("UserCustomData: %v", user.CustomAttrs))
 	req, err := b.GPT.CreateCompletion(ctx, openai.CompletionRequest{
 		Model:       openai.GPT3TextDavinci003,
 		Prompt:      fmt.Sprintf("写一个100字的欢迎语，欢迎%s加入%s，他的职位是%s，欢迎语需要活泼有趣。", *userName, *event.Event.Name, *userJobTitle),
@@ -84,6 +84,7 @@ func (b *Bot) getGreetText(ctx context.Context, user *recontact.User, event *lar
 	})
 
 	if err != nil {
+		fmt.Printf("GetGreetTextError: %s", err)
 		return "", err
 	}
 
