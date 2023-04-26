@@ -66,7 +66,8 @@ func (b *Bot) HandleUserAdded(ctx context.Context, event *larkim.P2ChatMemberUse
 		return err
 	}
 	// 在发送群消息
-	return b.sendMsg(ctx, *event.Event.ChatId, greetStr)
+	b.sendMsg(ctx, *event.Event.ChatId, greetStr)
+	return nil
 }
 
 func (b *Bot) getGreetText(ctx context.Context, user *recontact.User, event *larkim.P2ChatMemberUserAddedV1) (string, error) {
@@ -91,7 +92,7 @@ func (b *Bot) getGreetText(ctx context.Context, user *recontact.User, event *lar
 }
 
 func (b *Bot) sendMsg(ctx context.Context, chatId string, messageText string) error {
-	body, err := larkim.NewCreateMessagePathReqBodyBuilder().MsgType(larkim.MsgTypeText).
+	body, err := larkim.NewCreateMessagePathReqBodyBuilder().ReceiveId(chatId).MsgType(larkim.MsgTypeText).
 		Content(larkim.NewTextMsgBuilder().Text(messageText).Build()).Build()
 	if err != nil {
 		fmt.Printf("SendMsgError: %s", err)
@@ -99,10 +100,11 @@ func (b *Bot) sendMsg(ctx context.Context, chatId string, messageText string) er
 	}
 
 	req := larkim.NewCreateMessageReqBuilder().Body(body).ReceiveIdType("chat_id").Build()
-	_, err = b.Lark.Im.Message.Create(ctx, req)
+	res, err := b.Lark.Im.Message.Create(ctx, req)
 	if err != nil {
 		fmt.Printf("SendMsgError: %s", err)
 		return err
 	}
+	fmt.Printf("CreateMessageRes: %s", res.CodeError)
 	return nil
 }
