@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	recontact "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3"
@@ -100,7 +101,8 @@ func (b *Bot) getGreetText(ctx context.Context, user *recontact.User, event *lar
 }
 
 func (b *Bot) sendMsg(ctx context.Context, chatId string, messageText string) error {
-	body, err := larkim.NewCreateMessagePathReqBodyBuilder().ReceiveId(chatId).MsgType(larkim.MsgTypeText).
+	body, err := larkim.NewCreateMessagePathReqBodyBuilder().
+		Uuid(uuid.New().String()).ReceiveId(chatId).MsgType(larkim.MsgTypeText).
 		Content(larkim.NewTextMsgBuilder().Text(messageText).Build()).Build()
 	if err != nil {
 		fmt.Printf("SendMsgError: %s", err)
