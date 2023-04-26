@@ -51,12 +51,12 @@ func (b *Bot) HandleCardAction(ctx context.Context, event *larkcard.CardAction) 
 func (b *Bot) HandleUserAdded(ctx context.Context, event *larkim.P2ChatMemberUserAddedV1) error {
 	// 先获取用户信息
 	userId := event.Event.Users[0].UserId.UserId
-	fmt.Printf("HandleUserAdded: %s", *userId)
+	fmt.Println("HandleUserAdded: ", userId)
 
 	req := recontact.NewGetUserReqBuilder().UserId(*userId).UserIdType("user_id").Build()
 	res, err := b.Lark.Contact.User.Get(ctx, req)
 	if err != nil {
-		fmt.Printf("GetUserError: %s", err)
+		fmt.Println("GetUserError:", err)
 		return err
 	}
 
@@ -73,8 +73,8 @@ func (b *Bot) getGreetText(ctx context.Context, user *recontact.User, event *lar
 	// 根据用户信息里的名称和职位生成欢迎语
 	userName := user.Name
 	userJobTitle := user.JobTitle
-	fmt.Printf("UserName: %s", *userName)
-	fmt.Printf("JobTitle: %s", *userJobTitle)
+	fmt.Println("UserName: ", userName)
+	fmt.Println("JobTitle: ", userJobTitle)
 	fmt.Println("UserCustomData: ", user.CustomAttrs)
 	req, err := b.GPT.CreateCompletion(ctx, openai.CompletionRequest{
 		Model:       openai.GPT3TextDavinci003,
