@@ -10,6 +10,7 @@ import (
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"github.com/sashabaranov/go-openai"
 	"tastien.com/chat-bot/cache"
+	"tastien.com/chat-bot/utils"
 )
 
 type Bot struct {
@@ -66,7 +67,8 @@ func (b *Bot) HandleUserAdded(ctx context.Context, event *larkim.P2ChatMemberUse
 		return err
 	}
 	// 在发送群消息
-	b.sendMsg(ctx, *event.Event.ChatId, greetStr)
+	message, _ := utils.ProcessMessage(greetStr)
+	b.sendMsg(ctx, *event.Event.ChatId, message)
 	return nil
 }
 
