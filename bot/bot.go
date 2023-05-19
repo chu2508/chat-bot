@@ -83,6 +83,9 @@ func (b *Bot) getGreetText(ctx context.Context, user *recontact.User, event *lar
 	// 根据用户信息里的名称和职位生成欢迎语
 	userName := user.Name
 	userJobTitle := user.JobTitle
+	if len(user.CustomAttrs) != 0 {
+		userJobTitle = user.CustomAttrs[0].Value.Text
+	}
 	fmt.Println("UserName: ", *userName)
 	fmt.Println("JobTitle: ", *userJobTitle)
 	req, err := b.GPT.CreateCompletion(ctx, openai.CompletionRequest{
