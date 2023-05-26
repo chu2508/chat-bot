@@ -3,6 +3,7 @@ APP_ID: cli_axxx
 APP_SECRET: xxx
 APP_ENCRYPT_KEY: xxx
 APP_VERIFICATION_TOKEN: xxx
+BOT_NAME: Chat-GPT # 飞书机器人的名字
 # openAI key
 OPENAI_KEYS:  
  - sk-xxxxx

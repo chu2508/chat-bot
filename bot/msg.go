@@ -17,6 +17,7 @@ type MsgInfo struct {
 	ChatId      string
 	Content     string
 	SessionId   string
+	AtList      []string
 }
 
 type HandlerType string
@@ -34,6 +35,12 @@ func NewMsgInfo(event *larkim.P2MessageReceiveV1) *MsgInfo {
 	content := msg.Content
 	msgType := msg.MessageType
 	var handlerType HandlerType = HandlerType(*event.Event.Message.ChatType)
+	atList := []string{}
+
+	// 循环提取@的用户
+	for _, mention := range event.Event.Message.Mentions {
+		atList = append(atList, *mention.Name)
+	}
 
 	// 获取sessionId，用于后续的回复，如果有rootId，则使用rootId，否则使用messageId
 	sessionId := rootId
@@ -48,6 +55,7 @@ func NewMsgInfo(event *larkim.P2MessageReceiveV1) *MsgInfo {
 		SessionId:   *sessionId,
 		MsgType:     *msgType,
 		Content:     parseContent(*content),
+		AtList:      atList,
 	}
 }
 

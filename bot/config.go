@@ -12,6 +12,7 @@ type Config struct {
 	OpenAIUrl                  string
 	OpenAIModel                string
 	HttpPort                   int
+	BotName                    string
 }
 
 // 读取配置文件
@@ -29,6 +30,7 @@ func LoadConfig(path string) *Config {
 		OpenAIUrl:                  getViperStr("OPENAI_URL", "https://api.openai.com"),
 		OpenAIModel:                getViperStr("OPENAI_MODEL", "gpt-3.5-turbo"),
 		HttpPort:                   getViperInt("HTTP_PORT", 10086),
+		BotName:                    getViperStr("BOT_NAME", "TST-GPT"),
 	}
 
 	// 无效的配置直接panic

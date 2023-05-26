@@ -28,3 +28,21 @@ func (*SupportedMessageAction) Execute(payload *bot.ActionPayload) (bool, error)
 
 	return false, nil
 }
+
+// 判断是否@机器人
+type AtMessageAction struct{}
+
+func (*AtMessageAction) Execute(payload *bot.ActionPayload) (bool, error) {
+	atList := payload.Info.AtList
+	if len(atList) == 0 {
+		return false, nil
+	}
+	// 判断是否@机器人
+	for _, at := range atList {
+		if at == payload.Bot.Config.BotName {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
