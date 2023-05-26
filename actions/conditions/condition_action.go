@@ -33,6 +33,10 @@ func (*SupportedMessageAction) Execute(payload *bot.ActionPayload) (bool, error)
 type AtMessageAction struct{}
 
 func (*AtMessageAction) Execute(payload *bot.ActionPayload) (bool, error) {
+	// 如果是单聊消息直接通过
+	if payload.Info.HandlerType == bot.PersonalHandler {
+		return true, nil
+	}
 	atList := payload.Info.AtList
 	if len(atList) == 0 {
 		return false, nil
