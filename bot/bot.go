@@ -72,6 +72,7 @@ func (b *Bot) HandleUserAdded(ctx context.Context, event *larkim.P2ChatMemberUse
 	if err != nil {
 		return err
 	}
+	greetStr = greetStr + "\n以下是新人指南请接收：\n" + b.Config.WelcomeLink
 	// 在发送群消息
 	message, _ := utils.ProcessMessage(greetStr)
 	b.sendMsg(ctx, *event.Event.ChatId, message)

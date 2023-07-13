@@ -11,3 +11,5 @@ OPENAI_URL: https://api.openai.com
 OPENAI_MODEL: gpt-3.5-turbo
 # 服务器配置
 HTTP_PORT: 9000
+# 新人欢迎链接
+WELCOME_LINK: https://www.baidu.com
